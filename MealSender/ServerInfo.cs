@@ -202,6 +202,55 @@ namespace MealSender
 
         }
 
+        /// <summary>
+        /// Метод для принятия решения на основе сообщения
+        /// </summary>
+        public void UnderstandingWhatShouldIDo(Message msg)
+        {
+            switch (msg.Code) 
+            { 
+             /// waveCheck - запускаем волну, для сбора данных о нагрузке
+             /// В Info - ???
+                case ("waveCheck"):
+                    {
+                        //TODO либо переработать этот метод, либо здесь написать что-то для волны:
+                        SendingMessages();
+                    }
+                    break;
+
+                /// sendMsgTo - отправляем сообщение по адресу из Info
+                /// В Info - путь через '_', время занятия "столика"
+                ///         пример A_B_C_100
+                case ("sendMsgTo"):
+                    {
+                        List<string> way = msg.Info.Split('_').ToList();
+                        int i = 0;
+
+                        if (way.Count != 2)
+                        { 
+                            //Ищем данный сайт в списке-пути
+                            while (!way[i].Equals(this.Name))
+                                i++;
+
+                            //Сохранили следующий
+                            string targetServer = way[i + 1];
+
+                            //Собираем новую инфу                            
+                            way.RemoveAt(0);
+                            msg.Info = string.Concat(way);
+
+                            sendMessage(msg.ToString(), targetServer);
+                        }
+                        else
+                        {
+                            //TODO: добавить job (занять поток, занять место хз я) по обслуживанию клиента на заданное время
+                        }
+                    }                    
+                    break;
+
+            }
+        }
+
         private void sendMessage(string text, string targetServerName)
         {
             uint BytesWritten = 0;  // количество реально записанных в мэйлслот байт
@@ -232,7 +281,7 @@ namespace MealSender
         }
 
         /// <summary>
-        /// Получение информации для дочерних узлов.
+        /// Получение информации для родительского узла.
         /// </summary>
         /// <param name="msg">полученное сообщение</param>
         /// <returns>Сообщение для родительского узлов</returns>
