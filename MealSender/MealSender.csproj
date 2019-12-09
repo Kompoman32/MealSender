@@ -58,6 +58,7 @@
     <Compile Include="Import.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="ServerInfo.cs" />
+    <Compile Include="ServerInfoFuncs.cs" />
     <Compile Include="Types.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
