@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MealInfo.cs" />
     <Compile Include="ServerInfo.cs" />
     <Compile Include="ServerInfoFuncs.cs" />
     <Compile Include="Types.cs" />
