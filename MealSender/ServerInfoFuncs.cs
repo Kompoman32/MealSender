@@ -39,31 +39,30 @@ namespace MealSender
                     break;
 
                 /// sendMsgTo - отправляем сообщение по адресу из Info
-                /// В Info - путь через '_', время занятия "столика"
-                ///         пример A_B_C_100
+                /// В Info - путь через '_', время занятия "столика" и id работы
+                /// 
+                ///         пример A_B_C_:100_id
                 case ("sendMsgTo"):
                     {
-                        List<string> way = msg.Info.Split('_').ToList();
+                        List<string> infoAll = msg.Info.Split(':').ToList();
+                        List<string> way = infoAll[0].Split('_').ToList();
+
                         int i = 0;
 
-                        if (way.Count != 2)
-                        {
-                            //Ищем данный сайт в списке-пути
-                            while (!way[i].Equals(serverInfo.Name))
-                                i++;
+                        //Ищем данный сайт в списке-пути
+                        while (!way[i].Equals(serverInfo.Name))
+                            i++;
 
+                        if (way.Count - i != 1)
+                        {
                             //Сохранили следующий
                             string targetServer = way[i + 1];
-
-                            //Собираем новую инфу                            
-                            way.RemoveAt(0);
-                            msg.Info = string.Concat(way);
 
                             serverInfo.sendMessage(msg.ToString(), targetServer);
                         }
                         else
                         {
-                            //TODO: добавить job (занять поток, занять место хз я) по обслуживанию клиента на заданное время
+                            AddJob(infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
                         }
                     }
                     break;
@@ -71,7 +70,27 @@ namespace MealSender
             }
         }
 
+        //info - что-то, что мы хотим сообщить серверу
+        //message - старое сообщение
+        public Message MakeMessageToMain(string info, Message msg)
+        {
+            List<string> infoAll = msg.Info.Split(':').ToList();
+            List<string> way = infoAll[0].Split('_').ToList();
+
+            way.Reverse();
+            string newWay = string.Concat(way);
+
+            Message message = new Message(serverInfo.Name, "sendMsgTo", newWay + info);
+
+            return message;
+        }
        
+        public string AddJob(string time, string id)
+        {
+            int t = int.Parse(time);
+            throw new NotImplementedException();
+            //return "job {id} is addded"
+        }
 
         /// <summary>
         /// Получение информации для дочерних узлов.
