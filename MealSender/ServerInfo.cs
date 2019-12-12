@@ -42,20 +42,15 @@ namespace MealSender
         public int MessageCount = 0;
         List<Message> messagesPool = new List<Message>();
 
-        ServerInfoFuncs serverInfoFuncs;
-
         private static int CurrentHandleMailSlot;       // дескриптор мэйлслота
         private static Thread tReceiving;                       // поток для обслуживания мэйлслота
-        private static Thread tMain;                       // поток для обслуживания мэйлслота
+        private static Thread tSending;                       // поток для обслуживания мэйлслота
         bool _continue;
         object _lock;
 
         const int answerBlocksCount = 3;
         static public string delimeter = "||";
         Regex delimeterRegex = new Regex(@"\\|\\|");
-
-
-        public Message messageToFather;
 
         public ServerInfo(string name, string[] strings, string compName = ".")
         {
@@ -73,8 +68,6 @@ namespace MealSender
             {
                 throw new KeyNotFoundException("Сервер уже существует");
             }
-
-            this.serverInfoFuncs = new ServerInfoFuncs(this);
 
             Start();
         }
@@ -97,8 +90,8 @@ namespace MealSender
             {
                 tReceiving.Join();
                 tReceiving.Abort();
-                tMain.Join();
-                tMain.Abort();
+                tSending.Join();
+                tSending.Abort();
                 DIS.Import.CloseHandle(CurrentHandleMailSlot);            // закрываем дескриптор мэйлслота
             }
             catch
@@ -176,7 +169,56 @@ namespace MealSender
 
                 Message msg = messagesPool.FirstOrDefault();
 
-                serverInfoFuncs.UnderstandingWhatShouldIDo(msg);
+                UnderstandingWhatShouldIDo(msg);
+            }
+        }
+
+        /// <summary>
+        /// Метод для принятия решения на основе сообщения
+        /// </summary>
+        public void UnderstandingWhatShouldIDo(Message msg)
+        {
+            switch (msg.Code) 
+            { 
+             /// waveCheck - запускаем волну, для сбора данных о нагрузке
+             /// В Info - ???
+                case ("waveCheck"):
+                    {
+                        //TODO либо переработать этот метод, либо здесь написать что-то для волны:
+                        SendingMessages();
+                    }
+                    break;
+
+                /// sendMsgTo - отправляем сообщение по адресу из Info
+                /// В Info - путь через '_', время занятия "столика"
+                ///         пример A_B_C_100
+                case ("sendMsgTo"):
+                    {
+                        List<string> way = msg.Info.Split('_').ToList();
+                        int i = 0;
+
+                        if (way.Count != 2)
+                        { 
+                            //Ищем данный сайт в списке-пути
+                            while (!way[i].Equals(this.Name))
+                                i++;
+
+                            //Сохранили следующий
+                            string targetServer = way[i + 1];
+
+                            //Собираем новую инфу                            
+                            way.RemoveAt(0);
+                            msg.Info = string.Concat(way);
+
+                            sendMessage(msg.ToString(), targetServer);
+                        }
+                        else
+                        {
+                            //TODO: добавить job (занять поток, занять место хз я) по обслуживанию клиента на заданное время
+                        }
+                    }                    
+                    break;
+
             }
         }
 
@@ -188,7 +230,7 @@ namespace MealSender
             if (Father == null)
             {
                 Father = msg.From;
-                var childInfo = serverInfoFuncs.GetInfoForChild(msg);
+                var childInfo = GetInfoForChild(msg);
 
                 MessageCount++;
 
@@ -198,7 +240,7 @@ namespace MealSender
             {
                 if (MessageCount == ChildServers.Length)
                 {
-                    sendMessage(serverInfoFuncs.GetInfoForFather(), Father);
+                    sendMessage(GetInfoForFather(), Father);
                     Father = null;
                     MessageCount = 0;
 
@@ -209,10 +251,10 @@ namespace MealSender
                 MessageCount++;
             }
 
-            serverInfoFuncs.UpdateInfo(msg);
+            UpdateInfo(msg);
         }
 
-        public void sendMessage(string text, string targetServerName)
+        private void sendMessage(string text, string targetServerName)
         {
             uint BytesWritten = 0;  // количество реально записанных в мэйлслот байт
             byte[] buff = Encoding.Unicode.GetBytes(text);    // выполняем преобразование сообщения (вместе с идентификатором машины) в последовательность байт
@@ -229,6 +271,35 @@ namespace MealSender
             {
                 sendMessage(msg, s);
             }
+        }
+
+        /// <summary>
+        /// Получение информации для дочерних узлов.
+        /// </summary>
+        /// <param name="msg">полученное сообщение от отца</param>
+        /// <returns>Сообщение для дочерних узлов</returns>
+        public string GetInfoForChild(Message msg)
+        {
+
+        }
+
+        /// <summary>
+        /// Получение информации для родительского узла.
+        /// </summary>
+        /// <param name="msg">полученное сообщение</param>
+        /// <returns>Сообщение для родительского узлов</returns>
+        public string GetInfoForFather()
+        {
+
+        }
+
+        /// <summary>
+        /// Обновление инфы текущего узла.
+        /// </summary>
+        /// <param name="msg">полученное соощение</param>
+        public void UpdateInfo(Message msg)
+        {
+
         }
     }
 }
