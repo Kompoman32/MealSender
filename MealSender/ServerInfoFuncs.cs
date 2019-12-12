@@ -30,7 +30,7 @@ namespace MealSender
             {
                 /// waveCheck - запускаем волну, дл€ сбора данных о нагрузке
                 /// ¬ Info - 
-                case (CodeType.sendMsgTo):
+                case (CodeType.waveCheck):
                     {
                         //TODO либо переработать этот метод, либо здесь написать что-то дл€ волны:
                         //«апускаем волну/отправл€ем волну дальше
@@ -42,7 +42,7 @@ namespace MealSender
                 /// ¬ Info - путь через '_', врем€ зан€ти€ "столика" и id работы
                 /// 
                 ///         пример A_B_C_:100_id
-                case (CodeType.waveCheck)):
+                case (CodeType.sendMsgTo):
                     {
                         List<string> infoAll = msg.Info.Split(':').ToList();
                         List<string> way = infoAll[0].Split('_').ToList();
