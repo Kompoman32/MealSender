@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,6 +12,8 @@ namespace MealSender
     {
         string name;
         public string Name => name;
+
+        static Random rnd = new Random();
 
         public List<string> AllServers { get; }
         public List<string> ChildServers
@@ -47,13 +50,13 @@ namespace MealSender
         private static int CurrentHandleMailSlot;       // дескриптор мэйлслота
         private static Thread tReceiving;                       // поток для обслуживания мэйлслота
         private static Thread tMain;                       // поток для обслуживания мэйлслота
+        
         bool _continue;
         object _lock;
 
         const int answerBlocksCount = 3;
         static public string delimeter = "||";
         Regex delimeterRegex = new Regex(@"\|\|");
-
 
         public Message messageToFather;
 
@@ -62,11 +65,7 @@ namespace MealSender
             this.name = name;
 
             AllServers = new List<string>(strings);
-
             this.sendToDisplayAction = sendToDisplayAction;
-
-            messageToFather = new Message(name, Enum.GetName(typeof(CodeType), CodeType.waveCheck), "");
-
             var mailSlotname = Name;
 
             _continue = true;
@@ -192,16 +191,34 @@ namespace MealSender
         /// </summary>
         public void SendingMessages(Message msg)
         {
-            MessageCount++;
+            Thread.Sleep(rnd.Next(2000));
 
-            serverInfoFuncs.UpdateInfo(msg);
+            if (Father == null)
+            {
+                Father = msg.From;
+
+                this.messageToFather = new Message(this.Name, "waveCheck", $"{Name}");
+
+                var childInfo = serverInfoFuncs.GetInfoForChild(msg);
+
+                MessageCount++;
+
+                sendMessages(childInfo);
+            }
+            else
+            {
+                MessageCount++;
+                serverInfoFuncs.UpdateInfo(msg);
+            }
+
 
             if (MessageCount == AllServers.Count)
             {
-                MessageCount = 0;
-
+                sendMessage(serverInfoFuncs.GetInfoForFather().ToString(), Father);
                 sendToDisplayAction.Invoke(this.messageToFather.Info);
-                messageToFather = new Message(name, Enum.GetName(typeof(CodeType), CodeType.waveCheck), "");
+                MessageCount = 0;
+                Father = null;
+
                 return;
             }
         }

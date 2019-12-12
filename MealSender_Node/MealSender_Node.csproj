@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{339DF989-A481-4702-92C5-9E33208BDB28}</ProjectGuid>
+    <ProjectGuid>{55588B81-E90E-4A98-ADAF-E44D581CC9EA}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MealSender</RootNamespace>
-    <AssemblyName>MealSender</AssemblyName>
+    <RootNamespace>MealSender_Node</RootNamespace>
+    <AssemblyName>MealSender_Node</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,9 +55,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CodeType.cs" />
-    <Compile Include="Import.cs" />
-    <Compile Include="Message.cs" />
     <Compile Include="ServerInfo.cs" />
     <Compile Include="ServerInfoFuncs.cs" />
     <Compile Include="Types.cs" />
@@ -69,12 +66,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CodeType.cs" />
+    <Compile Include="Import.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
