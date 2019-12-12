@@ -18,10 +18,8 @@ namespace MealSender
 
         /// <summary>
         /// Цель сообщения
-        /// waveCheck - запускаем волну, для сбора данных о нагрузке
-        /// sendMsgTo - отправляем сообщение по адресу из Info
         /// </summary>
-        public string Code;
+        public CodeType Code;
 
         /// <summary>
         /// Данные сообщения
@@ -34,14 +32,14 @@ namespace MealSender
         public Message(string from, string code, string info)
         {
             From = from;
-            Code = code;
+            Code = (CodeType)Enum.Parse(typeof(CodeType), code);
             Info = info;
         }
 
         public override string ToString()
         {
-            return From + "||" +
-                   Code + "||" +
+            return From + ServerInfo.delimeter +
+                   Enum.GetName(typeof(CodeType), Code) + ServerInfo.delimeter +
                    Info;
         }
     }

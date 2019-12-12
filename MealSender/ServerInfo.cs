@@ -38,7 +38,7 @@ namespace MealSender
         }
 
         // MESSAGE TEMPLATE: FROM_KEY||CODE_KEY||INFO
-        public string MessageCode;
+        public CodeType MessageCode;
         public int MessageCount = 0;
         List<Message> messagesPool = new List<Message>();
 
@@ -48,9 +48,9 @@ namespace MealSender
         bool _continue;
         object _lock;
 
-        int answerBlocksCount = 3;
-        string delimeter = "||";
-        Regex delimeterRegex = new Regex(@"[|][|]");
+        const int answerBlocksCount = 3;
+        static public string delimeter = "||";
+        Regex delimeterRegex = new Regex(@"\\|\\|");
 
         public ServerInfo(string name, string[] strings, string compName = ".")
         {
@@ -79,8 +79,8 @@ namespace MealSender
             tReceiving = new Thread(ReceivingMessage);
             tReceiving.Start();
 
-            tSending = new Thread(SendingMessages);
-            tSending.Start();
+            tMain= new Thread(DoingThings);
+            tMain.Start();
         }
 
         public void Abort()
@@ -160,46 +160,17 @@ namespace MealSender
             return true;
         }
 
-        /// <summary>
-        /// Обработчик по отправке всем сообщений из пулла.
-        /// </summary>
-        public void SendingMessages()
+        public void DoingThings()
         {
-            lock(_lock)
+            while(_continue)
             {
-                while (_continue)
-                {
-                    Message msg;
+                if (!messagesPool.Any())
+                    continue;
 
-                    if (Father == null)
-                    {
-                        msg = messagesPool.FirstOrDefault();
-                        Father = msg.From;
-                        var childInfo = GetInfoForChild(msg);
+                Message msg = messagesPool.FirstOrDefault();
 
-                        MessageCount++;
-
-                        sendMessages(childInfo);
-                    }
-                    else
-                    {
-                        if (MessageCount == ChildServers.Length)
-                        {
-                            sendMessage(GetInfoForFather(), Father);
-                            Father = null;
-                            MessageCount = 0;
-                            
-                            return;
-                        }
-
-                        msg = messagesPool.FirstOrDefault(x => x.Code == MessageCode);
-                        MessageCount++;
-                    }
-
-                    UpdateInfo(msg);
-                }
+                UnderstandingWhatShouldIDo(msg);
             }
-
         }
 
         /// <summary>
@@ -249,6 +220,38 @@ namespace MealSender
                     break;
 
             }
+        }
+
+        /// <summary>
+        /// Обработчик по отправке всем сообщений из пулла.
+        /// </summary>
+        public void SendingMessages(Message msg)
+        {
+            if (Father == null)
+            {
+                Father = msg.From;
+                var childInfo = GetInfoForChild(msg);
+
+                MessageCount++;
+
+                sendMessages(childInfo);
+            }
+            else
+            {
+                if (MessageCount == ChildServers.Length)
+                {
+                    sendMessage(GetInfoForFather(), Father);
+                    Father = null;
+                    MessageCount = 0;
+
+                    return;
+                }
+
+                msg = messagesPool.FirstOrDefault(x => x.Code == MessageCode);
+                MessageCount++;
+            }
+
+            UpdateInfo(msg);
         }
 
         private void sendMessage(string text, string targetServerName)
