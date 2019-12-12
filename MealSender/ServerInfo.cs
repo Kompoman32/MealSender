@@ -52,6 +52,9 @@ namespace MealSender
         static public string delimeter = "||";
         Regex delimeterRegex = new Regex(@"\\|\\|");
 
+
+        public Message messageToFather;
+
         public ServerInfo(string name, string[] strings, string compName = ".")
         {
             this.name = name;
@@ -254,7 +257,7 @@ namespace MealSender
             UpdateInfo(msg);
         }
 
-        private void sendMessage(string text, string targetServerName)
+        public void sendMessage(string text, string targetServerName)
         {
             uint BytesWritten = 0;  // количество реально записанных в мэйлслот байт
             byte[] buff = Encoding.Unicode.GetBytes(text);    // выполняем преобразование сообщения (вместе с идентификатором машины) в последовательность байт
@@ -299,7 +302,7 @@ namespace MealSender
         /// <param name="msg">полученное соощение</param>
         public void UpdateInfo(Message msg)
         {
-
+            
         }
     }
 }
