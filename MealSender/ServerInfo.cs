@@ -42,12 +42,16 @@ namespace MealSender
         List<Message> messagesPool = new List<Message>();
 
         ServerInfoFuncs serverInfoFuncs;
-        Action<List<Cafe>> sendToDisplayAction;
+        public Action<CodeType> sendToDisplayAction;
 
         private static int CurrentHandleMailSlot;       // дескриптор мэйлслота
         private static Thread tReceiving;                       // поток для обслуживания мэйлслота
         private static Thread tMain;                       // поток для обслуживания мэйлслота
         bool _continue;
+
+        public List<Cafe> currentCafeInfos;
+        public bool WaitForCompleteBalance;
+        public Cafe SendCustomerTo;
 
         const int answerBlocksCount = 3;
         static public string delimeter = "||";
@@ -56,7 +60,7 @@ namespace MealSender
 
         public List<Cafe> waveInfo;
 
-        public ServerInfo(string name, string[] strings, Action<List<Cafe>> sendToDisplayAction, string compName = ".")
+        public ServerInfo(string name, string[] strings, Action<CodeType> sendToDisplayAction, string compName = ".")
         {
             this.name = name;
 
@@ -199,7 +203,9 @@ namespace MealSender
             {
                 MessageCount = 0;
 
-                sendToDisplayAction.Invoke(waveInfo);
+                currentCafeInfos = waveInfo;
+
+                sendToDisplayAction.Invoke(CodeType.waveCheck);
                 waveInfo = new List<Cafe>();
                 return;
             }
@@ -224,12 +230,18 @@ namespace MealSender
             }
         }
 
-        public void GetCustomerFrom(List<Cafe> cafes, Cafe from,  string jobId)
+        public void GetCustomerFrom(Cafe from)
         {
-            var tempCafe = new Cafe("", 0, 0, cafes);
-            string pathToCafe = tempCafe.GetPathToChild(from.Name);
-                
-            Message msgGetJobFrom = new Message(this.name, CodeType.getJobFrom.ToString(), pathToCafe + ":" + jobId);
+            //List<Cafe> cafes = currentCafeInfos;
+            //var tempCafe = new Cafe("", 0, 0, cafes);
+            //string pathToCafe = tempCafe.GetPathToChild(from.Name);
+
+            //var strings = pathToCafe.Split('_').ToList();
+
+            //var nameToSend = strings.Last();
+
+
+            Message msgGetJobFrom = new Message(this.name, CodeType.getJobFrom.ToString(), "");
             sendMessage(msgGetJobFrom.ToString(), from.Name);
         }
     }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Linq;
+using MealSender_Node;
 
 namespace MealSender
 {
@@ -14,8 +15,6 @@ namespace MealSender
         public string Name => name;
 
         static Random rnd = new Random();
-
-        public int capacity;
 
         public List<string> AllServers { get; }
         public List<string> ChildServers
@@ -55,7 +54,8 @@ namespace MealSender
         public static Thread tWork;                    //поток для выполнения работ
 
         bool _continue;
-        object _lock;
+
+        public MealInfo cafeInfo;
 
         const int answerBlocksCount = 3;
         static public string delimeter = "||";
@@ -63,7 +63,7 @@ namespace MealSender
 
         public Message messageToFather;
 
-        public ServerInfo(string name, string[] strings, Action<string> sendToDisplayAction, string compName = ".", int cap = -1)
+        public ServerInfo(string name, string[] strings, int capacity, Action<string> sendToDisplayAction, string compName = ".")
         {
             this.name = name;
 
@@ -71,10 +71,10 @@ namespace MealSender
             this.sendToDisplayAction = sendToDisplayAction;
             var mailSlotname = Name;
 
-            if (cap == -1)
-                cap = rnd.Next(0, 10);
+            //if (cap == -1)
+            //    cap = rnd.Next(0, 10);
 
-            capacity = cap;
+            cafeInfo = new MealInfo(capacity);
 
             _continue = true;
 
@@ -183,6 +183,8 @@ namespace MealSender
         {
             while (_continue)
             {
+                cafeInfo.TakeNextIfReady();
+
                 if (messagesPool.Count == 0)
                     continue;
 
@@ -199,13 +201,12 @@ namespace MealSender
         /// </summary>
         public void SendingMessages(Message msg)
         {
-            Thread.Sleep(rnd.Next(2000));
 
             if (Father == null)
             {
                 Father = msg.From;
 
-                this.messageToFather = new Message(this.Name, "waveCheck", $"{Name}");
+                this.messageToFather = new Message(this.Name, "waveCheck", $"{Name}_{cafeInfo.customers.Count}_{cafeInfo.capacity}");
 
                 var childInfo = serverInfoFuncs.GetInfoForChild(msg);
 
@@ -278,12 +279,12 @@ namespace MealSender
         public void DoJobs()
         { 
 
-            string wayBack = (string)obj.GetType().GetProperty("wayBack").GetValue(obj, null);
-            string jobId = (string)obj.GetType().GetProperty("id").GetValue(obj, null);
-            int time = (int)obj.GetType().GetProperty("t").GetValue(obj, null);
-            Thread.Sleep(time);
-            sendMessage(new Message(this.name, CodeType.sendMsgTo.ToString(), wayBack + ":" + jobId).ToString(), this.name);
-            Thread.CurrentThread.Abort();
+            //string wayBack = (string)obj.GetType().GetProperty("wayBack").GetValue(obj, null);
+            //string jobId = (string)obj.GetType().GetProperty("id").GetValue(obj, null);
+            //int time = (int)obj.GetType().GetProperty("t").GetValue(obj, null);
+            //Thread.Sleep(time);
+            //sendMessage(new Message(this.name, CodeType.sendMsgTo.ToString(), wayBack + ":" + jobId).ToString(), this.name);
+            //Thread.CurrentThread.Abort();
             /*
              uint BytesWritten = 0;  // количество реально записанных в мэйлслот байт
             byte[] buff = Encoding.Unicode.GetBytes(text);    // выполняем преобразование сообщения (вместе с идентификатором машины) в последовательность байт

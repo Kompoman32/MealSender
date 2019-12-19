@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="Cafe.cs" />
     <Compile Include="CodeType.cs" />
+    <Compile Include="Customer.cs" />
     <Compile Include="Import.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="ServerInfo.cs" />

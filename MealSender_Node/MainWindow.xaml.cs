@@ -62,7 +62,7 @@ namespace MealSender
         private ServerInfo ReadServerInfo(string fileName)
         {
             var strings = File.ReadAllLines(fileName);
-            if (strings.Length < 1)
+            if (strings.Length < 2)
             {
                 MessageBox.Show("Ничего не найдено :(");
                 return null;
@@ -71,10 +71,12 @@ namespace MealSender
             var list  = strings.ToList();
 
             var serverName = list[0];
-
             list.RemoveAt(0);
 
-            return new ServerInfo(serverName, list.ToArray(), SendToScreen);
+            var capacity = int.Parse(list[0]);
+            list.RemoveAt(0);
+
+            return new ServerInfo(serverName,  list.ToArray(), capacity, SendToScreen);
         }
 
         public void SendToScreen(string msg)

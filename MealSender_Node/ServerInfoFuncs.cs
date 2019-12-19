@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Linq;
+using MealSender_Node;
 
 namespace MealSender
 {
@@ -49,71 +50,86 @@ namespace MealSender
                 ///         пример A_B_C_:id_время
                 case (CodeType.sendMsgTo):
                     {
-                        List<string> infoAll = msg.Info.Split(':').ToList();
-                        List<string> way = infoAll[0].Split('_').ToList();
+                        var customer = Customer.Convert(msg.Info);
 
-                        int i = 0;
+                        serverInfo.cafeInfo.Add(customer);
 
-                        //Ищем данный сайт в списке-пути
-                        while (!way[i].Equals(serverInfo.Name))
-                            i++;
+                        serverInfo.sendMessage(msg.From, new Message(serverInfo.Name, CodeType.sendMsgTo.ToString(), "").ToString());
+                        //List<string> way = infoAll[0].Split('_').ToList();
 
-                        if (way.Count - i != 1)
-                        {
-                            //Сохранили следующий
-                            string targetServer = way[i + 1];
+                        //int i = 0;
 
-                            serverInfo.sendMessage(msg.ToString(), targetServer);
-                        }
-                        else
-                        {
-                            /*
-                            if (capacity - jobsThreads.Count > 0)
-                            {
-                                AddJob(infoAll[0], infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
-                            }*/
-                            if (capacity - jobsQueue.Count > 0)
-                            {
-                                AddJob(infoAll[0], infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
-                            }
-                            else
-                            {
-                                ReturnJob(infoAll[0], infoAll[1].Split('_')[0]);
-                            }
-                        }
+                        ////Ищем данный сайт в списке-пути
+                        //while (!way[i].Equals(serverInfo.Name))
+                        //    i++;`
+
+                        //if (way.Count - i != 1)
+                        //{
+                        //    //Сохранили следующий
+                        //    string targetServer = way[i + 1];
+
+                        //    serverInfo.sendMessage(msg.ToString(), targetServer);
+                        //}
+                        //else
+                        //{
+                        //    /*
+                        //    if (capacity - jobsThreads.Count > 0)
+                        //    {
+                        //        AddJob(infoAll[0], infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
+                        //    }*/
+                        //    if (capacity - jobsQueue.Count > 0)
+                        //    {
+                        //        AddJob(infoAll[0], infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
+                        //    }
+                        //    else
+                        //    {
+                        //        ReturnJob(infoAll[0], infoAll[1].Split('_')[0]);
+                        //    }
+                        //}
                     }
                     break;
 
 
                 case (CodeType.getJobFrom):
                     {
-                        List<string> infoAll = msg.Info.Split(':').ToList();
-                        List<string> way = infoAll[0].Split('_').ToList();
 
-                        int i = 0;
+                        var customer = serverInfo.cafeInfo.GetMaxCustomer();
 
-                        //Ищем данный сайт в списке-пути
-                        while (!way[i].Equals(serverInfo.Name))
-                            i++;
+                        var info = "";
 
-                        if (way.Count - i != 1)
+                        if (customer != null)
                         {
-                            //Сохранили следующий
-                            string targetServer = way[i + 1];
+                            info = customer.ToString();
+                        }
 
-                            serverInfo.sendMessage(msg.ToString(), targetServer);
-                        }
-                        else
-                        {
-                            string jobInfo = infoAll[0] + "→" + infoAll[1].Split('_')[0] + "→" + infoAll[1].Split('_')[1];
-                            if (jobsQueue.Contains(jobInfo)) 
-                            {
-                                jobsQueue.Remove(jobInfo);
-                                ReturnJob(infoAll[0], infoAll[1].Split('_')[0]);
-                            }
-                            else
-                                ;//nothing
-                        }
+                        serverInfo.sendMessage(msg.From, new Message(serverInfo.Name, CodeType.getJobFrom.ToString(), info).ToString());
+                        serverInfo.cafeInfo.Remove(customer);
+                        //List<string> way = infoAll[0].Split('_').ToList();
+
+                        //int i = 0;
+
+                        ////Ищем данный сайт в списке-пути
+                        //while (!way[i].Equals(serverInfo.Name))
+                        //    i++;
+
+                        //if (way.Count - i != 1)
+                        //{
+                        //    //Сохранили следующий
+                        //    string targetServer = way[i + 1];
+
+                        //    serverInfo.sendMessage(msg.ToString(), targetServer);
+                        //}
+                        //else
+                        //{
+                        //    //string jobInfo = infoAll[0] + "→" + infoAll[1].Split('_')[0] + "→" + infoAll[1].Split('_')[1];
+                        //    if (meal) 
+                        //    {
+                        //        jobsQueue.Remove(jobInfo);
+                        //        ReturnJob(infoAll[0], infoAll[1].Split('_')[0]);
+                        //    }
+                        //    else
+                        //        ;//nothing
+                        //}
                     }
                     break;
             }
@@ -155,16 +171,16 @@ namespace MealSender
             //jobThread.Start(new { wayBack, id, t });
 
         }
-        public void ReturnJob(string way, string id)
+        public void ReturnJob(string to, Customer customer)
         {
-            List<string> reverseWay = way.Split('_').Reverse().ToList();
-            string wayBack = "";
-            foreach (string site in reverseWay)
-                wayBack += "_" + site;
-            wayBack = wayBack.Remove(0, 1);
+            //List<string> reverseWay = way.Split('_').Reverse().ToList();
+            //string wayBack = "";
+            //foreach (string site in reverseWay)
+            //    wayBack += "_" + site;
+            //wayBack = wayBack.Remove(0, 1);
             //Thread jobThread = new Thread(serverInfo.DoJob);
             //jobThread.Start(new { wayBack, id, t });
-            serverInfo.sendMessage(new Message(serverInfo.Name, CodeType.getJobFrom.ToString(), wayBack+":"+id).ToString(),wayBack.Split('_')[1]);
+            serverInfo.sendMessage(to, new Message(serverInfo.Name, CodeType.getJobFrom.ToString(), customer.ToString()).ToString());
         }
         public void DoJob()
         {

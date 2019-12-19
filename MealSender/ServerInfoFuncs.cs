@@ -44,29 +44,10 @@ namespace MealSender
                 ///         пример A_B_C_:100_id
                 case (CodeType.sendMsgTo):
                     {
-                        //List<string> infoAll = msg.Info.Split(':').ToList();
-                        //List<string> way = infoAll[0].Split('_').ToList();
-
-                        //int i = 0;
-
-                        ////Ищем данный сайт в списке-пути
-                        //while (!way[i].Equals(serverInfo.Name))
-                        //    i++; 
-
-                        //if (way.Count - i != 1)
-                        //{
-                        //    //Сохранили следующий
-                        //    string targetServer = way[i + 1];
-
-                        //    serverInfo.sendMessage(msg.ToString(), targetServer);
-                        //}
-                        //else
-                        //{
-                        //    AddJob(infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
-                        //}
-
                         //TODO: вывести на экран сообщение о завершении работы
-
+                        serverInfo.sendToDisplayAction.Invoke(CodeType.sendMsgTo);
+                        serverInfo.SendCustomerTo = null;
+                        serverInfo.WaitForCompleteBalance = false;
                     }
                     break;
 
@@ -74,7 +55,39 @@ namespace MealSender
                 /// В Info - путь через '_' и id работы
                 case (CodeType.getJobFrom):
                     {
-                      //TODO: отправить тому, у кого наименьшая нагрузка
+                        //TODO: отправить тому, у кого наименьшая нагрузка
+
+                        if (msg.Info == "")
+                        {
+                            serverInfo.sendToDisplayAction.Invoke(CodeType.getJobFrom);
+                            serverInfo.SendCustomerTo = null;
+                            serverInfo.WaitForCompleteBalance = false;
+                        }
+                        else
+                        {
+                            var customer = Customer.Convert(msg.Info);
+
+                            var to = serverInfo.SendCustomerTo;
+
+                            //var tempCafe = new Cafe("", 0, 0, serverInfo.currentCafeInfos);
+                            //string pathToCafe = tempCafe.GetPathToChild(to.Name);
+
+                            //var strings = pathToCafe.Split('_').ToList();
+
+                            //var nameToSend = strings[0];
+                            //strings.RemoveAt(0);
+
+                            //pathToCafe = "";
+
+                            //foreach (var s in strings)
+                            //{
+                            //    pathToCafe += s;
+                            //}
+
+                            Message msgGetJobFrom = new Message(serverInfo.Name, CodeType.sendMsgTo.ToString(), customer.ToString());
+                            serverInfo.sendMessage(msgGetJobFrom.ToString(), to.Name);
+                        }
+
                     }
                     break;
 

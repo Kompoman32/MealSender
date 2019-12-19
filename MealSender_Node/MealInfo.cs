@@ -8,23 +8,32 @@ namespace MealSender_Node
 {
     public class Customer
     {
-        public int ID;
-
-        static Random rnd = new Random();
+        public string ID;
 
         public readonly int DurationInSeconds;
 
-        public Customer(int duration)
+        private Customer(string id, int duration)
         {
-            ID = rnd.Next();
+            ID = id;
             DurationInSeconds = duration;
+        }
+
+        public static Customer Convert(string str)
+        {
+            var strings = str.Split('_');
+            return new Customer(strings[0], int.Parse(strings[1]));
+        }
+
+        public override string ToString()
+        {
+            return $"{ID}_{DurationInSeconds}";
         }
     }
 
     public class MealInfo
     {
         public Queue<Customer> customers;
-        int capacity;
+        public int capacity;
 
         DateTime lastTime;
 
@@ -87,6 +96,23 @@ namespace MealSender_Node
 
 
             return duration;
+        }
+
+        public void TakeNextIfReady()
+        {
+            if (customers.Count == 0) return;
+
+            if (lastTime == new DateTime(DateTime.MaxValue.Ticks / 2))
+            {
+                lastTime = DateTime.Now;
+            }
+
+            if (lastTime.AddSeconds(customers.Peek().DurationInSeconds) <= DateTime.Now)
+            {
+                customers.Dequeue();
+                lastTime = new DateTime(DateTime.MaxValue.Ticks / 2);
+                return;
+            }
         }
     }
 }
