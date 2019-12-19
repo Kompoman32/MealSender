@@ -42,22 +42,21 @@ namespace MealSender
         List<Message> messagesPool = new List<Message>();
 
         ServerInfoFuncs serverInfoFuncs;
-        Action<string> sendToDisplayAction;
+        Action<List<Cafe>> sendToDisplayAction;
 
         private static int CurrentHandleMailSlot;       // дескриптор мэйлслота
         private static Thread tReceiving;                       // поток для обслуживания мэйлслота
         private static Thread tMain;                       // поток для обслуживания мэйлслота
         bool _continue;
-        object _lock;
 
         const int answerBlocksCount = 3;
         static public string delimeter = "||";
         Regex delimeterRegex = new Regex(@"\|\|");
 
 
-        public Message messageToFather;
+        public List<Cafe> waveInfo;
 
-        public ServerInfo(string name, string[] strings, Action<string> sendToDisplayAction, string compName = ".")
+        public ServerInfo(string name, string[] strings, Action<List<Cafe>> sendToDisplayAction, string compName = ".")
         {
             this.name = name;
 
@@ -65,7 +64,7 @@ namespace MealSender
 
             this.sendToDisplayAction = sendToDisplayAction;
 
-            messageToFather = new Message(name, Enum.GetName(typeof(CodeType), CodeType.waveCheck), "");
+            waveInfo = new List<Cafe>();
 
             var mailSlotname = Name;
 
@@ -188,9 +187,9 @@ namespace MealSender
         }
 
         /// <summary>
-        /// Обработчик по отправке всем сообщений из пулла.
+        /// Обработчик по отправке всем сообщений о волне из пулла.
         /// </summary>
-        public void SendingMessages(Message msg)
+        public void ProcessWavesMessages(Message msg)
         {
             MessageCount++;
 
@@ -200,8 +199,8 @@ namespace MealSender
             {
                 MessageCount = 0;
 
-                sendToDisplayAction.Invoke(this.messageToFather.Info);
-                messageToFather = new Message(name, Enum.GetName(typeof(CodeType), CodeType.waveCheck), "");
+                sendToDisplayAction.Invoke(waveInfo);
+                waveInfo = new List<Cafe>();
                 return;
             }
         }
@@ -217,12 +216,21 @@ namespace MealSender
             DIS.Import.CloseHandle(HandleMailSlot);
         }
 
-        public void sendMessages(string msg)
+        public void sendMessagesToChilds(string msg)
         {
             foreach (var s in ChildServers)
             {
                 sendMessage(msg, s);
             }
+        }
+
+        public void SendCustomerFromTo(List<Cafe> cafes,Cafe from, Cafe to)
+        {
+            var tempCafe = new Cafe("", 0, 0, cafes);
+            string pathToFrom = tempCafe.GetPathToChild(from.Name);
+            string pathToTo = tempCafe.GetPathToChild(to.Name);
+
+            // TODO: ТУТ ДОПИСАТЬ
         }
     }
 }

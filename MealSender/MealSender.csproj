@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Cafe.cs" />
     <Compile Include="CodeType.cs" />
     <Compile Include="Import.cs" />
     <Compile Include="Message.cs" />
