@@ -15,6 +15,8 @@ namespace MealSender
 
         static Random rnd = new Random();
 
+        public int capacity;
+
         public List<string> AllServers { get; }
         public List<string> ChildServers
         {
@@ -60,13 +62,18 @@ namespace MealSender
 
         public Message messageToFather;
 
-        public ServerInfo(string name, string[] strings, Action<string> sendToDisplayAction, string compName = ".")
+        public ServerInfo(string name, string[] strings, Action<string> sendToDisplayAction, string compName = ".", int cap = -1)
         {
             this.name = name;
 
             AllServers = new List<string>(strings);
             this.sendToDisplayAction = sendToDisplayAction;
             var mailSlotname = Name;
+
+            if (cap == -1)
+                cap = rnd.Next(0, 10);
+
+            capacity = cap;
 
             _continue = true;
 
