@@ -52,7 +52,8 @@ namespace MealSender
         private static int CurrentHandleMailSlot;       // дескриптор мэйлслота
         private static Thread tReceiving;                       // поток для обслуживания мэйлслота
         private static Thread tMain;                       // поток для обслуживания мэйлслота
-        
+        public static Thread tWork;                    //поток для выполнения работ
+
         bool _continue;
         object _lock;
 
@@ -249,7 +250,10 @@ namespace MealSender
             }
         }
 
-
+        /// <summary>
+        /// Depricated - не трогать 
+        /// </summary>
+        /// <param name="obj"></param>
         public void DoJobAsync(object obj)
         {
             string wayBack = (string)obj.GetType().GetProperty("wayBack").GetValue(obj, null); 
@@ -270,6 +274,27 @@ namespace MealSender
 
         }
 
-        
+
+        public void DoJobs()
+        { 
+
+            string wayBack = (string)obj.GetType().GetProperty("wayBack").GetValue(obj, null);
+            string jobId = (string)obj.GetType().GetProperty("id").GetValue(obj, null);
+            int time = (int)obj.GetType().GetProperty("t").GetValue(obj, null);
+            Thread.Sleep(time);
+            sendMessage(new Message(this.name, CodeType.sendMsgTo.ToString(), wayBack + ":" + jobId).ToString(), this.name);
+            Thread.CurrentThread.Abort();
+            /*
+             uint BytesWritten = 0;  // количество реально записанных в мэйлслот байт
+            byte[] buff = Encoding.Unicode.GetBytes(text);    // выполняем преобразование сообщения (вместе с идентификатором машины) в последовательность байт
+
+            var HandleMailSlot = DIS.Import.CreateFile($"\\\\.\\mailslot\\{targetServerName}", DIS.Types.EFileAccess.GenericAll, DIS.Types.EFileShare.Read, 0, DIS.Types.ECreationDisposition.OpenExisting, 0, 0); ;
+
+            DIS.Import.WriteFile(HandleMailSlot, buff, Convert.ToUInt32(buff.Length), ref BytesWritten, 0);     // выполняем запись последовательности байт в мэйлслот
+            DIS.Import.CloseHandle(HandleMailSlot);
+             */
+
+        }
+
     }
 }

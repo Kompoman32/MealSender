@@ -23,6 +23,7 @@ namespace MealSender
         {
             this.serverInfo = serverInfo;
             jobsQueue = new List<string>(5);
+            ServerInfo.tWork = new Thread(DoJob);
         }
 
         /// <summary>
@@ -123,12 +124,18 @@ namespace MealSender
         public Message MakeMessageToMain(string info, Message msg)
         {
             List<string> infoAll = msg.Info.Split(':').ToList();
-            List<string> way = infoAll[0].Split('_').ToList();
 
-            way.Reverse();
-            string newWay = string.Concat(way);
+            string way = infoAll[0];
+            List<string> reverseWay = way.Split('_').Reverse().ToList();
+            string wayBack = "";
+            foreach (string site in reverseWay)
+                wayBack += "_" + site;
+            wayBack = wayBack.Remove(0, 1);
 
-            Message message = new Message(serverInfo.Name, "sendMsgTo", newWay + info);
+            
+
+
+            Message message = new Message(serverInfo.Name, "sendMsgTo", wayBack + info);
 
             return message;
         }
@@ -143,11 +150,7 @@ namespace MealSender
             wayBack = wayBack.Remove(0, 1);
 
             jobsQueue.Add(wayBack + "→" + id + "→" + time);
-            string[] info = jobsQueue[0].Split('→');
-            jobsQueue.RemoveAt(0);
-
-            int t = int.Parse(info[2]);
-            DoJob(info[0], info[1], t);
+            
             //Thread jobThread = new Thread(serverInfo.DoJob);
             //jobThread.Start(new { wayBack, id, t });
 
@@ -163,17 +166,31 @@ namespace MealSender
             //jobThread.Start(new { wayBack, id, t });
             serverInfo.sendMessage(new Message(serverInfo.Name, CodeType.getJobFrom.ToString(), wayBack+":"+id).ToString(),wayBack.Split('_')[1]);
         }
-        public void DoJob(string way, string jobId, int time)
+        public void DoJob()
         {
-            Thread.Sleep(time);
+            string way = "";
+            string jobId = "";
+            int time = 0;
+            while (true)
+            {
+                if (jobsQueue.Count != 0)
+                {
+                    string[] info = jobsQueue[0].Split('→');
+                    jobsQueue.RemoveAt(0);
 
-            List<string> reverseWay = way.Split('_').Reverse().ToList();
-            string wayBack = "";
-            foreach (string site in reverseWay)
-                wayBack += "_" + site;
-            wayBack = wayBack.Remove(0, 1);
+                    int t = int.Parse(info[2]);
 
-            serverInfo.sendMessage(new Message(serverInfo.Name, CodeType.sendMsgTo.ToString(), wayBack + ":" + jobId).ToString(), serverInfo.Name);
+                    Thread.Sleep(time);
+
+                    List<string> reverseWay = way.Split('_').Reverse().ToList();
+                    string wayBack = "";
+                    foreach (string site in reverseWay)
+                        wayBack += "_" + site;
+                    wayBack = wayBack.Remove(0, 1);
+
+                    serverInfo.sendMessage(new Message(serverInfo.Name, CodeType.sendMsgTo.ToString(), wayBack + ":" + jobId).ToString(), serverInfo.Name);
+                }
+            }
         }
         /// <summary>
         /// Получение информации для дочерних узлов.
@@ -217,7 +234,9 @@ namespace MealSender
         {
             //Обновляем сообщение для инициатора
 
-            var info = serverInfo.messageToFather.Info;
+            var info = serverInfo.messageToFather.Info +
+                "_" + jobsQueue.Count.ToString() +
+                "_" + capacity.ToString();
 
             info += $";{msg.Info}";
 
