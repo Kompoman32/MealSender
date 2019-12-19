@@ -32,7 +32,7 @@ namespace MealSender
                 /// ¬ Info - 
                 case (CodeType.waveCheck):
                     {
-                        //TODO либо переработать этот метод, либо здесь написать что-то дл€ волны:
+                        
                         //«апускаем волну/отправл€ем волну дальше
                         serverInfo.ProcessWavesMessages(msg);
                     }
@@ -65,7 +65,16 @@ namespace MealSender
                         //    AddJob(infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
                         //}
 
+                        //TODO: вывести на экран сообщение о завершении работы
 
+                    }
+                    break;
+
+                /// getJobFrom - по этому коду получаем работу от некоего кафе
+                /// ¬ Info - путь через '_' и id работы
+                case (CodeType.getJobFrom):
+                    {
+                      //TODO: отправить тому, кому надо
                     }
                     break;
 
@@ -82,7 +91,7 @@ namespace MealSender
             way.Reverse();
             string newWay = string.Concat(way);
 
-            Message message = new Message(serverInfo.Name, "sendMsgTo", newWay + info);
+            Message message = new Message(serverInfo.Name, CodeType.sendMsgTo.ToString(), newWay + info);
 
             return message;
         }

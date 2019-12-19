@@ -34,7 +34,7 @@ namespace MealSender
                 /// ¬ Info - 
                 case (CodeType.waveCheck):
                     {
-                        //TODO либо переработать этот метод, либо здесь написать что-то дл€ волны:
+                        
                         //«апускаем волну/отправл€ем волну дальше
                         serverInfo.SendingMessages(msg);
                     }

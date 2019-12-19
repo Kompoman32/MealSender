@@ -19,6 +19,13 @@ namespace MealSender
         /// <summary>
         /// отправляем сообщение по адресу из Info
         /// </summary>
-        sendMsgTo
+        sendMsgTo,
+
+        /// <summary>
+        /// в info адрес и id 
+        /// адрес - у кого забрать работу
+        /// id - какую работу
+        /// </summary>
+        getJobFrom,
     }
 }

@@ -224,13 +224,13 @@ namespace MealSender
             }
         }
 
-        public void SendCustomerFromTo(List<Cafe> cafes,Cafe from, Cafe to)
+        public void GetCustomerFrom(List<Cafe> cafes, Cafe from,  string jobId)
         {
             var tempCafe = new Cafe("", 0, 0, cafes);
-            string pathToFrom = tempCafe.GetPathToChild(from.Name);
-            string pathToTo = tempCafe.GetPathToChild(to.Name);
-
-            // TODO: ТУТ ДОПИСАТЬ
+            string pathToCafe = tempCafe.GetPathToChild(from.Name);
+                
+            Message msgGetJobFrom = new Message(this.name, CodeType.getJobFrom.ToString(), pathToCafe + ":" + jobId);
+            sendMessage(msgGetJobFrom.ToString(), from.Name);
         }
     }
 }
