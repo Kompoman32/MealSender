@@ -75,7 +75,7 @@ namespace MealSender
                             "Балансировка", MessageBoxButton.YesNo, MessageBoxImage.Question);
                         if (result == MessageBoxResult.Yes)
                         {
-                            _info.SendCustomerFromTo(answer.Item1, answer.Item2);
+                            _info.SendCustomerFromTo(currentCafeInfos,answer.Item1, answer.Item2);
                         }
                         break;
                 }
