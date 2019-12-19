@@ -16,6 +16,8 @@ namespace MealSender
 
         ServerInfo serverInfo;
 
+        int capacity;
+
         public ServerInfoFuncs(ServerInfo serverInfo)
         {
             this.serverInfo = serverInfo;
