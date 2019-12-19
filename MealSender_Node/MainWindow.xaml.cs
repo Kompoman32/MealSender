@@ -45,7 +45,7 @@ namespace MealSender
         private void GetInfoButton_Click(object sender, RoutedEventArgs e)
         {
             _info.sendMessages($"{_info.Name}{ServerInfo.delimeter}"
-                             + $"{Enum.GetName(typeof(CodeType), CodeType.waveCheck)}{ServerInfo.delimeter}"
+                             + $"{CodeType.waveCheck.ToString()}{ServerInfo.delimeter}"
                              + $"Hello");
         }
 

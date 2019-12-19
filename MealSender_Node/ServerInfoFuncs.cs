@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,33 +17,35 @@ namespace MealSender
         ServerInfo serverInfo;
 
         int capacity;
-
+        List<String> jobsQueue;
+        //List<Thread> jobsThreads;
         public ServerInfoFuncs(ServerInfo serverInfo)
         {
             this.serverInfo = serverInfo;
+            jobsQueue = new List<string>(5);
         }
 
         /// <summary>
-        /// Метод для принятия решения на основе сообщения
+        /// РњРµС‚РѕРґ РґР»СЏ РїСЂРёРЅСЏС‚РёСЏ СЂРµС€РµРЅРёСЏ РЅР° РѕСЃРЅРѕРІРµ СЃРѕРѕР±С‰РµРЅРёСЏ
         /// </summary>
         public void UnderstandingWhatShouldIDo(Message msg)
         {
             switch (msg.Code)
             {
-                /// waveCheck - запускаем волну, для сбора данных о нагрузке
-                /// В Info - 
+                /// waveCheck - Р·Р°РїСѓСЃРєР°РµРј РІРѕР»РЅСѓ, РґР»СЏ СЃР±РѕСЂР° РґР°РЅРЅС‹С… Рѕ РЅР°РіСЂСѓР·РєРµ
+                /// Р’ Info - 
                 case (CodeType.waveCheck):
                     {
                         
-                        //Запускаем волну/отправляем волну дальше
+                        //Р—Р°РїСѓСЃРєР°РµРј РІРѕР»РЅСѓ/РѕС‚РїСЂР°РІР»СЏРµРј РІРѕР»РЅСѓ РґР°Р»СЊС€Рµ
                         serverInfo.SendingMessages(msg);
                     }
                     break;
 
-                /// sendMsgTo - отправляем сообщение по адресу из Info
-                /// В Info - путь через '_', время занятия "столика" и id работы
+                /// sendMsgTo - РѕС‚РїСЂР°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РїРѕ Р°РґСЂРµСЃСѓ РёР· Info
+                /// Р’ Info - РїСѓС‚СЊ С‡РµСЂРµР· '_', РІСЂРµРјСЏ Р·Р°РЅСЏС‚РёСЏ "СЃС‚РѕР»РёРєР°" Рё id СЂР°Р±РѕС‚С‹
                 /// 
-                ///         пример A_B_C_:100_id
+                ///         РїСЂРёРјРµСЂ A_B_C_:id_РІСЂРµРјСЏ
                 case (CodeType.sendMsgTo):
                     {
                         List<string> infoAll = msg.Info.Split(':').ToList();
@@ -51,29 +53,73 @@ namespace MealSender
 
                         int i = 0;
 
-                        //Ищем данный сайт в списке-пути
+                        //РС‰РµРј РґР°РЅРЅС‹Р№ СЃР°Р№С‚ РІ СЃРїРёСЃРєРµ-РїСѓС‚Рё
                         while (!way[i].Equals(serverInfo.Name))
                             i++;
 
                         if (way.Count - i != 1)
                         {
-                            //Сохранили следующий
+                            //РЎРѕС…СЂР°РЅРёР»Рё СЃР»РµРґСѓСЋС‰РёР№
                             string targetServer = way[i + 1];
 
                             serverInfo.sendMessage(msg.ToString(), targetServer);
                         }
                         else
                         {
-                            AddJob(infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
+                            /*
+                            if (capacity - jobsThreads.Count > 0)
+                            {
+                                AddJob(infoAll[0], infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
+                            }*/
+                            if (capacity - jobsQueue.Count > 0)
+                            {
+                                AddJob(infoAll[0], infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
+                            }
+                            else
+                            {
+                                ReturnJob(infoAll[0], infoAll[1].Split('_')[0]);
+                            }
                         }
                     }
                     break;
 
+
+                case (CodeType.getJobFrom):
+                    {
+                        List<string> infoAll = msg.Info.Split(':').ToList();
+                        List<string> way = infoAll[0].Split('_').ToList();
+
+                        int i = 0;
+
+                        //РС‰РµРј РґР°РЅРЅС‹Р№ СЃР°Р№С‚ РІ СЃРїРёСЃРєРµ-РїСѓС‚Рё
+                        while (!way[i].Equals(serverInfo.Name))
+                            i++;
+
+                        if (way.Count - i != 1)
+                        {
+                            //РЎРѕС…СЂР°РЅРёР»Рё СЃР»РµРґСѓСЋС‰РёР№
+                            string targetServer = way[i + 1];
+
+                            serverInfo.sendMessage(msg.ToString(), targetServer);
+                        }
+                        else
+                        {
+                            string jobInfo = infoAll[0] + "в†’" + infoAll[1].Split('_')[0] + "в†’" + infoAll[1].Split('_')[1];
+                            if (jobsQueue.Contains(jobInfo)) 
+                            {
+                                jobsQueue.Remove(jobInfo);
+                                ReturnJob(infoAll[0], infoAll[1].Split('_')[0]);
+                            }
+                            else
+                                ;//nothing
+                        }
+                    }
+                    break;
             }
         }
 
-        //info - что-то, что мы хотим сообщить серверу
-        //message - старое сообщение
+        //info - С‡С‚Рѕ-С‚Рѕ, С‡С‚Рѕ РјС‹ С…РѕС‚РёРј СЃРѕРѕР±С‰РёС‚СЊ СЃРµСЂРІРµСЂСѓ
+        //message - СЃС‚Р°СЂРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
         public Message MakeMessageToMain(string info, Message msg)
         {
             List<string> infoAll = msg.Info.Split(':').ToList();
@@ -87,32 +133,67 @@ namespace MealSender
             return message;
         }
        
-        public string AddJob(string time, string id)
+        public void AddJob(string way, string id, string time)
         {
-            int t = int.Parse(time);
-            throw new NotImplementedException();
-            //return "job {id} is addded"
-        }
 
+            List<string> reverseWay = way.Split('_').Reverse().ToList();
+            string wayBack = "";
+            foreach (string site in reverseWay)
+                wayBack += "_" + site;
+            wayBack = wayBack.Remove(0, 1);
+
+            jobsQueue.Add(wayBack + "в†’" + id + "в†’" + time);
+            string[] info = jobsQueue[0].Split('в†’');
+            jobsQueue.RemoveAt(0);
+
+            int t = int.Parse(info[2]);
+            DoJob(info[0], info[1], t);
+            //Thread jobThread = new Thread(serverInfo.DoJob);
+            //jobThread.Start(new { wayBack, id, t });
+
+        }
+        public void ReturnJob(string way, string id)
+        {
+            List<string> reverseWay = way.Split('_').Reverse().ToList();
+            string wayBack = "";
+            foreach (string site in reverseWay)
+                wayBack += "_" + site;
+            wayBack = wayBack.Remove(0, 1);
+            //Thread jobThread = new Thread(serverInfo.DoJob);
+            //jobThread.Start(new { wayBack, id, t });
+            serverInfo.sendMessage(new Message(serverInfo.Name, CodeType.getJobFrom.ToString(), wayBack+":"+id).ToString(),wayBack.Split('_')[1]);
+        }
+        public void DoJob(string way, string jobId, int time)
+        {
+            Thread.Sleep(time);
+
+            List<string> reverseWay = way.Split('_').Reverse().ToList();
+            string wayBack = "";
+            foreach (string site in reverseWay)
+                wayBack += "_" + site;
+            wayBack = wayBack.Remove(0, 1);
+
+            serverInfo.sendMessage(new Message(serverInfo.Name, CodeType.sendMsgTo.ToString(), wayBack + ":" + jobId).ToString(), serverInfo.Name);
+        }
         /// <summary>
-        /// Получение информации для дочерних узлов.
+        /// РџРѕР»СѓС‡РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё РґР»СЏ РґРѕС‡РµСЂРЅРёС… СѓР·Р»РѕРІ.
         /// </summary>
-        /// <param name="msg">полученное сообщение от отца</param>
-        /// <returns>Сообщение для дочерних узлов</returns>
+        /// <param name="msg">РїРѕР»СѓС‡РµРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ РѕС‚С†Р°</param>
+        /// <returns>РЎРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РґРѕС‡РµСЂРЅРёС… СѓР·Р»РѕРІ</returns>
         public string GetInfoForChild(Message msg)
         {
-            /// В Info - путь c разделителем '_'
-            return new Message(serverInfo.Name, Enum.GetName(typeof(CodeType), CodeType.waveCheck), "").ToString();
+            /// Р’ Info - РїСѓС‚СЊ c СЂР°Р·РґРµР»РёС‚РµР»РµРј '_'
+            return new Message(serverInfo.Name, CodeType.waveCheck.ToString(), "").ToString();
         }
 
         /// <summary>
-        /// Получение информации для родительского узла.
+        /// РџРѕР»СѓС‡РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё РґР»СЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ СѓР·Р»Р°.
         /// </summary>
-        /// <param name="msg">полученное сообщение</param>
-        /// <returns>Сообщение для родительского узлов</returns>
+        /// <param name="msg">РїРѕР»СѓС‡РµРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ</param>
+        /// <returns>РЎРѕРѕР±С‰РµРЅРёРµ РґР»СЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ СѓР·Р»РѕРІ</returns>
         public Message GetInfoForFather()
         {
-            /// В Info - пути до вершин (сообщения от потомков) + их нагрузка
+            /// Р’ Info - РїСѓС‚Рё РґРѕ РІРµСЂС€РёРЅ (СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ РїРѕС‚РѕРјРєРѕРІ) + РёС… РЅР°РіСЂСѓР·РєР°
 
             var info = serverInfo.messageToFather.Info;
 
@@ -129,12 +210,12 @@ namespace MealSender
         }
 
         /// <summary>
-        /// Обновление инфы текущего узла.
+        /// РћР±РЅРѕРІР»РµРЅРёРµ РёРЅС„С‹ С‚РµРєСѓС‰РµРіРѕ СѓР·Р»Р°.
         /// </summary>
-        /// <param name="msg">полученное соощение</param>
+        /// <param name="msg">РїРѕР»СѓС‡РµРЅРЅРѕРµ СЃРѕРѕС‰РµРЅРёРµ</param>
         public void UpdateInfo(Message msg)
         {
-            //Обновляем сообщение для инициатора
+            //РћР±РЅРѕРІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РёРЅРёС†РёР°С‚РѕСЂР°
 
             var info = serverInfo.messageToFather.Info;
 

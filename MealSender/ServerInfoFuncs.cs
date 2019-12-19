@@ -51,7 +51,7 @@ namespace MealSender
 
                         ////Ищем данный сайт в списке-пути
                         //while (!way[i].Equals(serverInfo.Name))
-                        //    i++;
+                        //    i++; 
 
                         //if (way.Count - i != 1)
                         //{
@@ -74,7 +74,7 @@ namespace MealSender
                 /// В Info - путь через '_' и id работы
                 case (CodeType.getJobFrom):
                     {
-                      //TODO: отправить тому, кому надо
+                      //TODO: отправить тому, у кого наименьшая нагрузка
                     }
                     break;
 
