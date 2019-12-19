@@ -6,17 +6,16 @@
         xmlns:local="clr-namespace:MealSender"
         mc:Ignorable="d"
         Closing="Window_Closing"
-
         Title="MainWindow" Height="450" Width="600">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
+        <Grid>
             <Button Click="ReadButton_Click" Width="90" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10">Read txt</Button>
-            <Button Click="GetInfoButton_Click" Width="90" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120 10 10 10">GetInfo</Button>
             <TextBlock x:Name="Info"  Background="LightGray"  Margin="0 50 0 0"></TextBlock>
+
         </Grid>
 
         <Button Click="RefreshTextBlockButton_Click" Grid.Column="1" Width="30" Height="30" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 0 0 0">-</Button>

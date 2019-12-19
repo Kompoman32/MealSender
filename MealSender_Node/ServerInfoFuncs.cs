@@ -99,13 +99,8 @@ namespace MealSender
         /// <returns>—ообщение дл€ дочерних узлов</returns>
         public string GetInfoForChild(Message msg)
         {
-            //ѕосле получени€ сообщени€ от инициатора (родител€), 
-            //создаем новое сообщение дл€ ответа инициатору
-            serverInfo.messageToFather = new Message(serverInfo.Name, "waveCheck", "");
-
             /// ¬ Info - путь c разделителем '_'
-            msg.Info += serverInfo + "_";
-            return msg.Info;
+            return new Message(serverInfo.Name, Enum.GetName(typeof(CodeType), CodeType.waveCheck), "").ToString();
         }
 
         /// <summary>
@@ -116,6 +111,18 @@ namespace MealSender
         public Message GetInfoForFather()
         {
             /// ¬ Info - пути до вершин (сообщени€ от потомков) + их нагрузка
+
+            var info = serverInfo.messageToFather.Info;
+
+            while (info.Contains(";;"))
+            {
+                info = info.Replace(";;", ";");
+            }
+
+            info = info.Trim(';');
+
+            serverInfo.messageToFather.Info = $"({info})";
+
             return serverInfo.messageToFather;
         }
 
@@ -126,7 +133,12 @@ namespace MealSender
         public void UpdateInfo(Message msg)
         {
             //ќбновл€ем сообщение дл€ инициатора
-            serverInfo.messageToFather.Info += msg.Info;
+
+            var info = serverInfo.messageToFather.Info;
+
+            info += $";{msg.Info}";
+
+            serverInfo.messageToFather.Info = info;
         }
     }
 }

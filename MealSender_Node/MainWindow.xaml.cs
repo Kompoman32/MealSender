@@ -54,6 +54,11 @@ namespace MealSender
             textBlock.Text = "";
         }
 
+        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(_info.messageToFather.Info);
+        }
+
         private ServerInfo ReadServerInfo(string fileName)
         {
             var strings = File.ReadAllLines(fileName);
@@ -74,11 +79,11 @@ namespace MealSender
 
         public void SendToScreen(string msg)
         {
-            lock(_info)
+            lock (_info)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    textBlock.Text += $"{new DateTime().ToString("HH:MM:ss")}: Получено сообщение\n";
+                    textBlock.Text += $"{new DateTime().ToString("HH:MM:ss")}: Отправлено сообщение\n";
                     textBlock.Text += "---------------\n";
                     foreach (var l in msg.Split('\n'))
                     {
