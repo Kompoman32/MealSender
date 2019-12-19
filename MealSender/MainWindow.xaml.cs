@@ -26,6 +26,8 @@ namespace MealSender
         {
             InitializeComponent();
 
+            //currentCafeInfos = new List<Cafe>() { new Cafe("Дубай", 4, 5), new Cafe("Номер 1", 1, 5), new Cafe("Дубай2", 4, 5) };
+
             _info = ReadServerInfo("servers.txt");
             Title = _info.Name;
             ShowInfo();
@@ -44,14 +46,55 @@ namespace MealSender
 
         private void GetInfoButton_Click(object sender, RoutedEventArgs e)
         {
-            _info.sendMessages($"{_info.Name}{ServerInfo.delimeter}"
-                             + $"{Enum.GetName(typeof(CodeType), CodeType.waveCheck)}{ServerInfo.delimeter}"
-                             + $"Hello");
+            _info.sendMessagesToChilds($"{_info.Name}{ServerInfo.delimeter}"
+                                         + $"{Enum.GetName(typeof(CodeType), CodeType.waveCheck)}{ServerInfo.delimeter}"
+                                         + $"Hello");
         }
 
-        private void RefreshTextBlockButton_Click(object sender, RoutedEventArgs e)
+        private void BalanceButton_Click(object sender, RoutedEventArgs e)
         {
-            textBlock.Text = "";
+            if (currentCafeInfos == null)
+            {
+                MessageBox.Show("Нечего балансировать, сначала соберите информацию");
+            }
+            else
+            {
+                switch (currentCafeInfos.Count)
+                {
+                    case 0:
+                        MessageBox.Show("Нечего балансировать, у тебя нет кафе :(");
+                        break;
+                    case 1:
+                        MessageBox.Show("Нечего балансировать, пффф, у тебя одно кафе, ты шо?");
+                        break;
+                    default:
+                        var answer = Balance(currentCafeInfos);
+
+                        var result = MessageBox.Show($"Нужно отправить клиента {answer.Item1.Name} в кафе {answer.Item2.Name}\n" +
+                            $"Выполнить?",
+                            "Балансировка", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            _info.SendCustomerFromTo(answer.Item1, answer.Item2);
+                        }
+                        break;
+                }
+            }
+
+
+
+            
+            
+        }
+
+        private Tuple<Cafe, Cafe> Balance(List<Cafe> cafes)
+        {
+            var sortedCafes = cafes.SelectMany(x=> x.GetChilds()).OrderBy((x) => x.fullnessPercent);
+
+
+            var answer = new Tuple<Cafe, Cafe>(cafes.Last(), cafes.First());
+
+            return answer;
         }
 
         private ServerInfo ReadServerInfo(string fileName)
@@ -72,21 +115,18 @@ namespace MealSender
             return new ServerInfo(serverName, list.ToArray(), SendToScreen);
         }
 
-        public void SendToScreen(string msg)
+        List<Cafe> currentCafeInfos;
+
+        public void SendToScreen(List<Cafe> cafes)
         {
-            lock(_info)
+            Dispatcher.Invoke(() =>
             {
-                Dispatcher.Invoke(() =>
+                currentCafeInfos = cafes;
+                foreach (var c in cafes)
                 {
-                    textBlock.Text += $"{new DateTime().ToString("HH:MM:ss")}: Получено сообщение\n";
-                    textBlock.Text += "---------------\n";
-                    foreach (var l in msg.Split('\n'))
-                    {
-                        textBlock.Text += l + "\n";
-                    }
-                    textBlock.Text += "---------------\n";
-                });
-            }
+                    textBlock.Text += cafes.ToString() + "\n";
+                }
+            });
         }
 
         private void ShowInfo()

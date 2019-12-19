@@ -34,7 +34,7 @@ namespace MealSender
                     {
                         //TODO либо переработать этот метод, либо здесь написать что-то дл€ волны:
                         //«апускаем волну/отправл€ем волну дальше
-                        serverInfo.SendingMessages(msg);
+                        serverInfo.ProcessWavesMessages(msg);
                     }
                     break;
 
@@ -44,26 +44,28 @@ namespace MealSender
                 ///         пример A_B_C_:100_id
                 case (CodeType.sendMsgTo):
                     {
-                        List<string> infoAll = msg.Info.Split(':').ToList();
-                        List<string> way = infoAll[0].Split('_').ToList();
+                        //List<string> infoAll = msg.Info.Split(':').ToList();
+                        //List<string> way = infoAll[0].Split('_').ToList();
 
-                        int i = 0;
+                        //int i = 0;
 
-                        //»щем данный сайт в списке-пути
-                        while (!way[i].Equals(serverInfo.Name))
-                            i++;
+                        ////»щем данный сайт в списке-пути
+                        //while (!way[i].Equals(serverInfo.Name))
+                        //    i++;
 
-                        if (way.Count - i != 1)
-                        {
-                            //—охранили следующий
-                            string targetServer = way[i + 1];
+                        //if (way.Count - i != 1)
+                        //{
+                        //    //—охранили следующий
+                        //    string targetServer = way[i + 1];
 
-                            serverInfo.sendMessage(msg.ToString(), targetServer);
-                        }
-                        else
-                        {
-                            AddJob(infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
-                        }
+                        //    serverInfo.sendMessage(msg.ToString(), targetServer);
+                        //}
+                        //else
+                        //{
+                        //    AddJob(infoAll[1].Split('_')[0], infoAll[1].Split('_')[1]);
+                        //}
+
+
                     }
                     break;
 
@@ -101,10 +103,10 @@ namespace MealSender
         {
             //ѕосле получени€ сообщени€ от инициатора (родител€), 
             //создаем новое сообщение дл€ ответа инициатору
-            serverInfo.messageToFather = new Message(serverInfo.Name, "waveCheck", "");
+            //serverInfo.messageToFather = new Message(serverInfo.Name, "waveCheck", "");
 
             /// ¬ Info - путь c разделителем '_'
-            msg.Info += serverInfo + "_";
+            //msg.Info += serverInfo + "_";
             return msg.Info;
         }
 
@@ -113,10 +115,19 @@ namespace MealSender
         /// </summary>
         /// <param name="msg">полученное сообщение</param>
         /// <returns>—ообщение дл€ родительского узлов</returns>
-        public Message GetInfoForFather()
+        public string GetInfoForFather()
         {
             /// ¬ Info - пути до вершин (сообщени€ от потомков) + их нагрузка
-            return serverInfo.messageToFather;
+            var cafeInfos = serverInfo.waveInfo;
+
+            string str = "";
+            foreach(var c in cafeInfos)
+            {
+                str += c.ToString() + "\n";
+            }
+
+
+            return str;
         }
 
         /// <summary>
@@ -126,7 +137,7 @@ namespace MealSender
         public void UpdateInfo(Message msg)
         {
             //ќбновл€ем сообщение дл€ инициатора
-            serverInfo.messageToFather.Info += msg.Info;
+            serverInfo.waveInfo.Add(Cafe.Convert(msg.Info));
         }
     }
 }
