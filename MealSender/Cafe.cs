@@ -27,6 +27,7 @@ namespace MealSender
         // ex: (Second_23_45;(Fourth_4_8);(Third_9_9))
         public static Cafe Convert(string str)
         {
+            str = str.Replace("\0", "");
             if (str.Contains('(') && str.Contains(')'))
             {
                 str = str.Substring(1).Remove(str.Length - 2);
