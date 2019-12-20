@@ -48,11 +48,13 @@ namespace MealSender
         {
             _info.sendMessagesToChilds($"{_info.Name}{ServerInfo.delimeter}"
                                          + $"{CodeType.waveCheck.ToString()}{ServerInfo.delimeter}"
-                                         + $"Hello");
+                                         + $"");
         }
 
         private void BalanceButton_Click(object sender, RoutedEventArgs e)
         {
+
+
             if (_info.WaitForCompleteBalance)
             {
                 MessageBox.Show("Извини, я жду конца предыдущей балансировки");
@@ -65,7 +67,13 @@ namespace MealSender
                 return;
             }
 
-            switch (_info.currentCafeInfos.Count)
+            var cafes = _info.currentCafeInfos.SelectMany(x => {
+                var childs = x.GetChilds();
+                childs.Add(x);
+                return childs;
+            });
+
+            switch (cafes.Count())
             {
                 case 0:
                     MessageBox.Show("Нечего балансировать, у тебя нет кафе :(");
@@ -74,7 +82,7 @@ namespace MealSender
                     MessageBox.Show("Нечего балансировать, пффф, у тебя одно кафе, ты шо?");
                     break;
                 default:
-                    var answer = Balance(_info.currentCafeInfos);
+                    var answer = Balance(cafes.ToList());
 
                     var result = MessageBox.Show($"Нужно отправить клиента {answer.Item1.Name} в кафе {answer.Item2.Name}\n" +
                         $"Выполнить?",
@@ -86,19 +94,14 @@ namespace MealSender
                     }
                     break;
             }
-
-
-
-            
-            
         }
 
         private Tuple<Cafe, Cafe> Balance(List<Cafe> cafes)
         {
-            var sortedCafes = cafes.SelectMany(x=> x.GetChilds()).OrderBy((x) => x.fullnessPercent);
+            var sortedCafes = cafes.OrderBy((x) => x.fullnessPercent);
 
 
-            var answer = new Tuple<Cafe, Cafe>(cafes.Last(), cafes.First());
+            var answer = new Tuple<Cafe, Cafe>(cafes.First(), cafes.Last());
 
             return answer;
         }
@@ -139,7 +142,7 @@ namespace MealSender
 
                 if (info == CodeType.waveCheck)
                 {
-                    //MessageBox.Show("Дерево собрано");
+                    MessageBox.Show("Дерево собрано");
                     UpdateCafeInfo();
                 }
             });
