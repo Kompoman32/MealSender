@@ -39,7 +39,7 @@ namespace MealSender
         public override string ToString()
         {
             return From + ServerInfo.delimeter +
-                   Enum.GetName(typeof(CodeType), Code) + ServerInfo.delimeter +
+                   Code.ToString() + ServerInfo.delimeter +
                    Info;
         }
     }

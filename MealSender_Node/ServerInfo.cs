@@ -206,7 +206,7 @@ namespace MealSender
             {
                 Father = msg.From;
 
-                this.messageToFather = new Message(this.Name, "waveCheck", $"{Name}_{cafeInfo.customers.Count}_{cafeInfo.capacity}");
+                this.messageToFather = new Message(this.Name, CodeType.waveCheck.ToString(), $"{Name}_{cafeInfo.customers.Count}_{cafeInfo.capacity}");
 
                 var childInfo = serverInfoFuncs.GetInfoForChild(msg);
 
