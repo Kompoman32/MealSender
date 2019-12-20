@@ -28,7 +28,7 @@ namespace MealSender
         public static Cafe Convert(string str)
         {
             str.Replace("\0", "");
-            str.Replace(";;", ";")  ;
+            str.Replace(";;", ";");
             if (str.Contains('(') && str.Contains(')'))
             {
                 str = str.Substring(1).Remove(str.Length - 2);
@@ -48,6 +48,8 @@ namespace MealSender
 
             var cafeStrings = curCafe.Split('_');
 
+            if (cafeStrings.Length < 3)
+                return null;
             return new Cafe(cafeStrings[0], int.Parse(cafeStrings[1]), int.Parse(cafeStrings[2]), cafes);
         }
 
