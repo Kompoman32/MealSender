@@ -138,7 +138,7 @@ namespace MealSender
         /// <param name="msg">полученное сообщение от отца</param>
         /// <returns>Сообщение для дочерних узлов</returns>
         public string GetInfoForChild(Message msg)
-        {
+        { 
             /// В Info - путь c разделителем '_'
             return new Message(serverInfo.Name, CodeType.waveCheck.ToString(), "").ToString();
         }
@@ -176,6 +176,8 @@ namespace MealSender
 
             var info = serverInfo.messageToFather.Info;
 
+            if (msg.Info.Equals(null))
+                msg.Info = "";
             info += $";{msg.Info}";
 
             serverInfo.messageToFather.Info = info;

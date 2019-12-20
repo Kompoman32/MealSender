@@ -39,13 +39,13 @@ namespace MealSender
 
             var cafes = new List<Cafe>();
 
-            foreach(var s in strings)
+            foreach (var s in strings)
             {
-                cafes.Add(Cafe.Convert(s));
+                if (!s.Equals("") && !s.Contains("\0"))
+                    cafes.Add(Cafe.Convert(s));
             }
 
             var cafeStrings = curCafe.Split('_');
-
 
             return new Cafe(cafeStrings[0], int.Parse(cafeStrings[1]), int.Parse(cafeStrings[2]), cafes);
         }

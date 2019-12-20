@@ -85,7 +85,7 @@ namespace MealSender_Node
             return ret;
         }
 
-        public int GetDuration ()
+        public int GetDuration()
         {
             var duration = 0;
 
