@@ -27,6 +27,8 @@ namespace MealSender
         // ex: (Second_23_45;(Fourth_4_8);(Third_9_9))
         public static Cafe Convert(string str)
         {
+            str.Replace("\0", "");
+            str.Replace(";;", ";")  ;
             if (str.Contains('(') && str.Contains(')'))
             {
                 str = str.Substring(1).Remove(str.Length - 2);
@@ -38,13 +40,13 @@ namespace MealSender
 
             var cafes = new List<Cafe>();
 
-            foreach(var s in strings)
+            foreach (var s in strings)
             {
-                cafes.Add(Cafe.Convert(s));
+                if (!s.Equals("") && !s.Contains("\0"))
+                    cafes.Add(Cafe.Convert(s));
             }
 
             var cafeStrings = curCafe.Split('_');
-
 
             return new Cafe(cafeStrings[0], int.Parse(cafeStrings[1]), int.Parse(cafeStrings[2]), cafes);
         }
