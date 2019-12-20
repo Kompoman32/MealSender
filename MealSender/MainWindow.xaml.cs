@@ -211,7 +211,11 @@ namespace MealSender
         {
             var str = "";
 
-            foreach (var c in _info.currentCafeInfos)
+            foreach (var c in _info.currentCafeInfos.SelectMany(x => {
+                var childs = x.GetChilds();
+                childs.Add(x);
+                return childs;
+            }))
             {
                 str += $"{c.Name} : {c.CustomerCount}/{c.Capacity}\n";
             }
